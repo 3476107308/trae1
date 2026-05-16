@@ -156,7 +156,7 @@ Page({
 
   editTodo: function(e) {
     const id = e.currentTarget.dataset.id;
-    const todo = this.data.todoList.find(item => item.id === id);
+    const todo = this.data.todoList.find(item => item.id == id);
     if (todo) {
       const today = this.formatDate(new Date());
       const isToday = todo.date === today;
@@ -314,7 +314,7 @@ Page({
       success: (res) => {
         if (res.data.success) {
           const todoList = this.data.todoList.map(item => {
-            if (item.id === id) {
+            if (item.id == id) {
               return { ...item, completed: !item.completed };
             }
             return item;
@@ -608,7 +608,7 @@ Page({
   toggleSubtask: function(e) {
     var id = e.currentTarget.dataset.id;
     var detailSubtasks = this.data.detailSubtasks.map(function(item) {
-      if (item.id === id) {
+      if (item.id == id) {
         return { id: item.id, todo_id: item.todo_id, title: item.title, completed: item.completed == 1 ? 0 : 1 };
       }
       return item;
@@ -626,7 +626,7 @@ Page({
       success: function(modalRes) {
         if (modalRes.confirm) {
           var detailSubtasks = that.data.detailSubtasks.filter(function(item) {
-            return item.id !== id;
+            return item.id != id;
           });
           that.setData({ detailSubtasks: detailSubtasks });
           that.updateCompletedSubtaskCount();
