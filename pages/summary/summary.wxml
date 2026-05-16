@@ -1,0 +1,59 @@
+<view class="container">
+  <view class="header">
+    <view class="nav-back" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <text class="title">事项总览</text>
+    <view class="nav-placeholder"></view>
+  </view>
+
+  <view class="month-nav">
+    <view class="nav-btn" bindtap="prevMonth">
+      <text class="nav-icon">‹</text>
+    </view>
+    <text class="month-title">{{currentYear}}年{{currentMonth}}月</text>
+    <view class="nav-btn" bindtap="nextMonth">
+      <text class="nav-icon">›</text>
+    </view>
+  </view>
+
+  <view class="calendar-container">
+    <view class="week-header">
+      <text class="week-day">日</text>
+      <text class="week-day">一</text>
+      <text class="week-day">二</text>
+      <text class="week-day">三</text>
+      <text class="week-day">四</text>
+      <text class="week-day">五</text>
+      <text class="week-day">六</text>
+    </view>
+    
+    <view class="calendar-grid">
+      <view wx:for="{{calendarData}}" wx:key="index" class="week-row">
+        <view 
+          wx:for="{{item}}" 
+          wx:key="itemIndex" 
+          class="day-cell {{item.day === 0 ? 'empty' : ''}} {{item.hasTodo ? 'has-todo' : ''}}"
+          bindtap="selectDate"
+          data-date="{{item.date}}"
+        >
+          <text wx:if="{{item.day > 0}}" class="day-number">{{item.day}}</text>
+          <view wx:if="{{item.hasTodo}}" class="todo-info">
+            <text class="todo-count">{{item.total}}</text>
+            <text class="completed-count">{{item.completed}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="legend">
+    <view class="legend-item">
+      <view class="legend-dot"></view>
+      <text class="legend-text">有事项</text>
+    </view>
+    <view class="legend-item">
+      <text class="legend-text">数字：总事项 / 已完成</text>
+    </view>
+  </view>
+</view>

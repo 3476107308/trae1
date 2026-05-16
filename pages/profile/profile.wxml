@@ -1,0 +1,24 @@
+<view class="container">
+  <view class="header">
+    <text class="title">个人说明</text>
+  </view>
+
+  <view class="content-section">
+    <view class="section-block">
+      <text class="block-title">你好</text>
+      <text class="block-text">我正在学习使用 AI 辅助开发小程序。这个事项清单小程序用于记录每天要完成的任务，并通过点击事项来标记完成状态。</text>
+    </view>
+
+    <view class="section-block">
+      <text class="block-title">功能说明</text>
+      <text class="block-text">1. 添加待办事项\n2. 点击事项切换完成状态\n3. 按日期查看和管理事项\n4. 查看事项总览和完成趋势</text>
+    </view>
+
+    <view class="section-block">
+      <text class="block-title">开发目标</text>
+      <text class="block-text">通过这个项目，我正在学习小程序开发的基本流程，包括页面搭建、数据绑定、事件处理和本地数据管理。</text>
+    </view>
+  </view>
+
+  <button class="back-btn" bindtap="goBack">返回首页</button>
+</view>

@@ -1,0 +1,286 @@
+<view class="container">
+  <view class="header">
+    <text class="title">我的事项清单</text>
+    <view class="header-actions">
+      <text class="action-link" bindtap="goToTrend">趋势</text>
+      <text class="action-link" bindtap="goToSummary">总览</text>
+      <text class="action-link profile-link" bindtap="goToProfile">个人说明</text>
+    </view>
+  </view>
+
+  <view class="date-section">
+    <view class="view-mode-tabs">
+      <view 
+        class="mode-tab {{viewMode === 'day' ? 'active' : ''}}" 
+        bindtap="switchToDayMode"
+      >
+        <text>按天</text>
+      </view>
+      <view 
+        class="mode-tab {{viewMode === 'week' ? 'active' : ''}}" 
+        bindtap="switchToWeekMode"
+      >
+        <text>按周</text>
+      </view>
+    </view>
+    <view class="date-nav">
+      <view class="nav-btn" bindtap="{{viewMode === 'day' ? 'prevDay' : 'prevWeek'}}">
+        <text class="nav-icon">‹</text>
+      </view>
+      <view class="date-display" bindtap="today">
+        <text class="current-date">{{viewMode === 'day' ? currentDate : weekStart + ' ~ ' + weekEnd}}</text>
+        <text class="date-tip">{{viewMode === 'day' ? '点击返回今天' : '点击返回本周'}}</text>
+      </view>
+      <view class="nav-btn" bindtap="{{viewMode === 'day' ? 'nextDay' : 'nextWeek'}}">
+        <text class="nav-icon">›</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="input-section">
+    <input class="todo-input" placeholder="请输入事项内容" value="{{inputValue}}" bindinput="handleInput" />
+    <button class="add-btn" bindtap="addTodo">添加</button>
+  </view>
+
+  <view class="list-section">
+    <view wx:if="{{isLoading}}" class="loading-tip">
+      <text class="loading-text">加载中...</text>
+    </view>
+    
+    <view wx:if="{{!isLoading && viewMode === 'day'}}">
+      <view class="section-group">
+        <view class="section-header">
+          <text class="section-title">未完成</text>
+          <text class="section-count">{{pendingTodos.length}}</text>
+        </view>
+        <view class="todo-list">
+          <view wx:if="{{pendingTodos.length === 0}}" class="empty-tip">暂无未完成事项</view>
+          <block wx:if="{{pendingTodos.length > 0}}">
+            <view wx:for="{{pendingTodos}}" wx:key="id" class="todo-item" bindtap="toggleTodo" data-id="{{item.id}}">
+              <view class="priority-bar priority-{{item.priority || 'P2'}}"></view>
+              <view class="todo-status">
+                <view class="status-icon">
+                </view>
+              </view>
+              <text class="todo-title">{{item.title}}</text>
+              <view class="todo-edit" catchtap="editTodo" data-id="{{item.id}}">
+                <text class="edit-icon">⋯</text>
+              </view>
+            </view>
+          </block>
+        </view>
+      </view>
+
+      <view class="divider"></view>
+
+      <view class="section-group">
+        <view class="section-header">
+          <text class="section-title">已完成</text>
+          <text class="section-count">{{completedTodos.length}}</text>
+        </view>
+        <view class="todo-list completed-list">
+          <view wx:if="{{completedTodos.length === 0}}" class="empty-tip">暂无已完成事项</view>
+          <block wx:if="{{completedTodos.length > 0}}">
+            <view wx:for="{{completedTodos}}" wx:key="id" class="todo-item" bindtap="toggleTodo" data-id="{{item.id}}">
+              <view class="priority-bar priority-{{item.priority || 'P2'}}"></view>
+              <view class="todo-status">
+                <view class="status-icon completed">
+                  <text class="check-icon">✓</text>
+                </view>
+              </view>
+              <text class="todo-title completed">{{item.title}}</text>
+              <view class="todo-edit" catchtap="editTodo" data-id="{{item.id}}">
+                <text class="edit-icon">⋯</text>
+              </view>
+            </view>
+          </block>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{!isLoading && viewMode === 'week'}}">
+      <view wx:for="{{weekTodos}}" wx:key="date" class="week-day-group">
+        <view class="week-day-header" bindtap="goToDayView" data-date="{{item.date}}">
+          <text class="week-day-label">{{item.dayLabel}}</text>
+          <text class="week-day-date">{{item.date}}</text>
+          <text class="week-day-count">{{item.pending.length + item.completed.length}}项</text>
+        </view>
+        <view wx:if="{{item.pending.length === 0 && item.completed.length === 0}}" class="week-empty">
+          <text class="empty-text">无事项</text>
+        </view>
+        <view wx:if="{{item.pending.length > 0 || item.completed.length > 0}}" class="week-todo-list">
+          <view wx:for="{{item.pending}}" wx:key="id" class="todo-item" bindtap="toggleTodo" data-id="{{item.id}}">
+            <view class="priority-bar priority-{{item.priority || 'P2'}}"></view>
+            <view class="todo-status">
+              <view class="status-icon">
+              </view>
+            </view>
+            <text class="todo-title">{{item.title}}</text>
+            <view class="todo-edit" catchtap="editTodo" data-id="{{item.id}}">
+              <text class="edit-icon">⋯</text>
+            </view>
+          </view>
+          <view wx:for="{{item.completed}}" wx:key="id" class="todo-item">
+            <view class="priority-bar priority-{{item.priority || 'P2'}}"></view>
+            <view class="todo-status">
+              <view class="status-icon completed">
+                <text class="check-icon">✓</text>
+              </view>
+            </view>
+            <text class="todo-title completed">{{item.title}}</text>
+            <view class="todo-edit" catchtap="editTodo" data-id="{{item.id}}">
+              <text class="edit-icon">⋯</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{showDetailPanel}}" class="detail-panel-mask" bindtap="closeDetailPanel"></view>
+  <view wx:if="{{showDetailPanel}}" class="detail-panel">
+    <view class="panel-header">
+      <view class="panel-back" bindtap="closeDetailPanel">
+        <text class="back-icon">‹</text>
+      </view>
+      <text class="panel-title">{{editingId ? '编辑事项' : '添加事项'}}</text>
+      <view class="panel-save" bindtap="saveDetailTodo">
+        <text class="save-text">{{editingId ? '保存' : '添加'}}</text>
+      </view>
+    </view>
+    
+    <view class="panel-content">
+      <view class="form-item">
+        <text class="form-label">标题</text>
+        <input class="form-input" placeholder="请输入事项标题" value="{{detailTitle}}" bindinput="handleDetailTitleInput" />
+      </view>
+      
+      <view class="form-item">
+        <text class="form-label">描述</text>
+        <textarea class="form-textarea" placeholder="请输入事项描述" value="{{detailDescription}}" bindinput="handleDetailDescriptionInput"></textarea>
+      </view>
+      
+      <view class="form-item">
+        <text class="form-label">日期</text>
+        <view class="options-row">
+          <view 
+            class="option-btn {{detailDate === 'today' ? 'selected' : ''}}" 
+            bindtap="selectDetailDate" 
+            data-value="today"
+          >
+            <text>{{detailDate === 'today' ? '✓' : ''}} 今天</text>
+          </view>
+          <view 
+            class="option-btn {{detailDate === 'tomorrow' ? 'selected' : ''}}" 
+            bindtap="selectDetailDate" 
+            data-value="tomorrow"
+          >
+            <text>{{detailDate === 'tomorrow' ? '✓' : ''}} 明天</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="form-item">
+        <text class="form-label">难度</text>
+        <view class="options-row">
+          <view 
+            class="option-btn {{detailCategory === 'unclassified' ? 'selected' : ''}}" 
+            bindtap="selectDetailCategory" 
+            data-value="unclassified"
+          >
+            <text>{{detailCategory === 'unclassified' ? '✓' : ''}} 未分类</text>
+          </view>
+          <view 
+            class="option-btn {{detailCategory === 'normal' ? 'selected' : ''}}" 
+            bindtap="selectDetailCategory" 
+            data-value="normal"
+          >
+            <text>{{detailCategory === 'normal' ? '✓' : ''}} 一般</text>
+          </view>
+          <view 
+            class="option-btn {{detailCategory === 'medium' ? 'selected' : ''}}" 
+            bindtap="selectDetailCategory" 
+            data-value="medium"
+          >
+            <text>{{detailCategory === 'medium' ? '✓' : ''}} 中等难度</text>
+          </view>
+          <view 
+            class="option-btn {{detailCategory === 'high' ? 'selected' : ''}}" 
+            bindtap="selectDetailCategory" 
+            data-value="high"
+          >
+            <text>{{detailCategory === 'high' ? '✓' : ''}} 较高难度</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="form-item">
+        <text class="form-label">优先级</text>
+        <view class="options-row">
+          <view 
+            class="option-btn priority-btn priority-p1 {{detailPriority === 'P1' ? 'selected' : ''}}" 
+            bindtap="selectDetailPriority" 
+            data-value="P1"
+          >
+            <text>{{detailPriority === 'P1' ? '✓' : ''}} 高 P1</text>
+          </view>
+          <view 
+            class="option-btn priority-btn priority-p2 {{detailPriority === 'P2' ? 'selected' : ''}}" 
+            bindtap="selectDetailPriority" 
+            data-value="P2"
+          >
+            <text>{{detailPriority === 'P2' ? '✓' : ''}} 中 P2</text>
+          </view>
+          <view 
+            class="option-btn priority-btn priority-p3 {{detailPriority === 'P3' ? 'selected' : ''}}" 
+            bindtap="selectDetailPriority" 
+            data-value="P3"
+          >
+            <text>{{detailPriority === 'P3' ? '✓' : ''}} 低 P3</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="form-item">
+        <view class="section-header">
+          <text class="form-label">子任务</text>
+          <text wx:if="{{detailSubtasks.length > 0}}" class="subtask-progress">{{completedSubtaskCount}}/{{detailSubtasks.length}}</text>
+        </view>
+        
+        <view wx:if="{{showSubtaskInput}}" class="subtask-input-row">
+          <input 
+            class="subtask-input" 
+            placeholder="输入子任务内容" 
+            value="{{subtaskInputValue}}" 
+            bindinput="handleSubtaskInput"
+            bindconfirm="addSubtask"
+          />
+          <view class="subtask-input-actions">
+            <text class="subtask-btn confirm" bindtap="addSubtask">确认</text>
+            <text class="subtask-btn cancel" bindtap="cancelSubtaskInput">取消</text>
+          </view>
+        </view>
+        
+        <view wx:for="{{detailSubtasks}}" wx:key="id" class="subtask-item" bindtap="toggleSubtask" data-id="{{item.id}}">
+          <view class="subtask-status">
+            <view class="subtask-checkbox {{item.completed == 1 ? 'checked' : ''}}">
+              <text wx:if="{{item.completed == 1}}" class="check-icon">✓</text>
+            </view>
+          </view>
+          <text class="subtask-title {{item.completed == 1 ? 'completed' : ''}}">{{item.title}}</text>
+          <view class="subtask-delete" catchtap="deleteSubtask" data-id="{{item.id}}">
+            <text>删除</text>
+          </view>
+        </view>
+        
+        <view wx:if="{{detailSubtasks.length === 0 && !showSubtaskInput}}" class="subtask-empty">
+          <text class="add-subtask" bindtap="showSubtaskInput">+ 添加子任务</text>
+        </view>
+        
+        <view wx:if="{{detailSubtasks.length > 0 && !showSubtaskInput}}" class="subtask-add">
+          <text class="add-subtask" bindtap="showSubtaskInput">+ 添加子任务</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
